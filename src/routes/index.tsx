@@ -1,7 +1,8 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import MainLayout from "@/layout/MainLayout";
 import Login from "@/page/Login/Login";
 import Dashboard from "@/page/Dashboard/Dashboard";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -10,8 +11,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        path: "/",
-        Component: Login,
+        element: <Navigate to="/dashboard" replace />,
       },
       {
         path: "/login",
@@ -19,7 +19,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        Component: Dashboard,
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
