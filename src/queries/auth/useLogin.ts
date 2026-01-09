@@ -50,6 +50,10 @@ export const useLogin = () => {
       // Decode token to extract user info
       try {
         const decodedToken = jwtDecode<DecodedToken>(accessToken);
+        if (decodedToken.role !== "ADMIN") {
+          console.error("Only ADMIN users can log in.");
+          return;
+        }
 
         const userData = {
           id: decodedToken.id,

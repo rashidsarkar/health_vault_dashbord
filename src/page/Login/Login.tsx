@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,8 +29,6 @@ export default function Login() {
     }
 
     // Log email and password
-    console.log("Email:", email);
-    console.log("Password:", password);
 
     // Call login mutation
     loginMutation({ email, password });
