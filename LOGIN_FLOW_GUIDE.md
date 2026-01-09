@@ -1,6 +1,7 @@
 # Professional Login Flow Guide
 
 ## Overview
+
 This document outlines the complete authentication flow for the Health Vault Dashboard application using Axios and TanStack Query.
 
 ---
@@ -8,7 +9,9 @@ This document outlines the complete authentication flow for the Health Vault Das
 ## Architecture
 
 ### 1. **Authentication Context** (`AuthContext.ts`)
+
 Central state management for authentication:
+
 - `user`: Current user data (id, email, role, profileId)
 - `token`: JWT access token
 - `login()`: Store user and token
@@ -16,14 +19,18 @@ Central state management for authentication:
 - `isAuthenticated`: Boolean flag for protected routes
 
 ### 2. **Auth Provider** (`AuthProvider.tsx`)
+
 Initializes authentication on app load:
+
 - Checks localStorage for existing token on mount
 - Validates token expiration using `jwtDecode`
 - Restores user session if token is valid
 - Provides loading state to prevent UI flashing
 
 ### 3. **Login Mutation** (`useLogin.ts`)
+
 TanStack Query mutation for login:
+
 - Sends credentials to `/auth/login` endpoint
 - Decodes JWT token from response
 - Stores token in localStorage, sessionStorage, and cookies
@@ -31,21 +38,26 @@ TanStack Query mutation for login:
 - Automatically redirects to `/dashboard` on success
 
 ### 4. **Logout Hook** (`useLogout.ts`)
+
 Handles logout with TanStack Query:
+
 - Clears all authentication state
 - Removes token from storage and cookies
 - Redirects to login page
 - Continues logout even if API call fails
 
 ### 5. **Axios Interceptors**
+
 Two axios instances handle different scenarios:
 
 #### Public Instance (`axiosInstancePublic.ts`)
+
 - Used for login/signup endpoints
 - Adds bearer token to Authorization header if available
 - Handles 401 errors by redirecting to login
 
 #### Secure Instance (`useAxiosInstanceSecure.ts`)
+
 - For authenticated API calls
 - Automatically attaches JWT token
 - Logs out user on 401/403 errors
@@ -97,6 +109,7 @@ Two axios instances handle different scenarios:
 ## Protected Routes
 
 The `ProtectedRoute` component validates:
+
 - ✅ User exists in context
 - ✅ Token exists in context
 - ✅ Redirects to login if either is missing
@@ -114,16 +127,19 @@ if (!isAuthenticated || !token) {
 ## Token Management
 
 ### Storage Locations
+
 - **localStorage**: Persistent across sessions
 - **Cookies**: Sent with API requests automatically
 - **Memory**: Stored in AuthContext
 
 ### Token Validation
+
 - Automatically decoded when stored
 - Expiration checked on app load
 - Invalid/expired tokens trigger logout
 
 ### Token Expiration Handler
+
 - 401/403 responses trigger immediate logout
 - User redirected to login page
 - All stored tokens cleared
@@ -133,13 +149,17 @@ if (!isAuthenticated || !token) {
 ## API Interceptor Details
 
 ### Request Interceptor
+
 Automatically adds Authorization header:
+
 ```typescript
 config.headers.Authorization = `Bearer ${token}`;
 ```
 
 ### Response Interceptor
+
 Handles authentication errors:
+
 ```typescript
 if (status === 401 || status === 403) {
   logout();
@@ -157,13 +177,14 @@ if (status === 401 || status === 403) {
 ✅ **Automatic Interceptors**: Token attached to all requests  
 ✅ **Cleanup on Logout**: All traces removed from storage  
 ✅ **HTTPS Ready**: withCredentials enabled  
-✅ **SameSite Cookies**: Secure cookie settings  
+✅ **SameSite Cookies**: Secure cookie settings
 
 ---
 
 ## Usage Examples
 
 ### Using useLogin Hook
+
 ```typescript
 const { mutate: login, isPending, error } = useLogin();
 
@@ -174,6 +195,7 @@ const handleSubmit = (e) => {
 ```
 
 ### Using useLogout Hook
+
 ```typescript
 const { mutate: logout, isPending } = useLogout();
 
@@ -183,6 +205,7 @@ const handleLogout = () => {
 ```
 
 ### Using useAuth Hook
+
 ```typescript
 const { user, token, isAuthenticated, logout } = useAuth();
 
@@ -192,11 +215,12 @@ if (!isAuthenticated) {
 ```
 
 ### Using Secure Axios Instance
+
 ```typescript
 const axiosSecure = useAxiosInstanceSecure();
 
 const fetchUserData = async () => {
-  const response = await axiosSecure.get('/user/profile');
+  const response = await axiosSecure.get("/user/profile");
   return response.data;
 };
 ```
@@ -206,6 +230,7 @@ const fetchUserData = async () => {
 ## API Response Format
 
 ### Login Success
+
 ```json
 {
   "success": true,
@@ -218,6 +243,7 @@ const fetchUserData = async () => {
 ```
 
 ### JWT Token Payload
+
 ```json
 {
   "id": "user_id_here",
@@ -282,21 +308,25 @@ src/
 ## Troubleshooting
 
 ### Login redirects to login instead of dashboard
+
 - Check token is being decoded correctly
 - Verify JWT payload structure matches DecodedToken interface
 - Check localStorage is being set
 
 ### Protected route not working
+
 - Ensure ProtectedRoute wraps the dashboard component
 - Check isAuthenticated boolean returns correct value
 - Verify token exists in context
 
 ### 401 errors after login
+
 - Check Authorization header format: `Bearer {token}`
 - Verify token is not expired
 - Check API endpoint requires authentication
 
 ### Logout doesn't work
+
 - Verify useLogout hook is imported and used correctly
 - Check localStorage.removeItem() is called
 - Verify document.cookie is set correctly
